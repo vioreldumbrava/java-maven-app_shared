@@ -1,0 +1,109 @@
+# Jenkins Configuration as Code (JCasC)
+# Docs: https://github.com/jenkinsci/configuration-as-code-plugin
+#
+# ${VAR}            -> value of environment variable VAR
+# ${VAR:-default}   -> same, with a default
+# ${secret_name}    -> if env var is not set, falls back to the file /run/secrets/<secret_name>
+#                      (docker-compose "secrets:" mounts files there, so no secret lives in this file)
+
+jenkins:
+  systemMessage: "Configured by JCasC (jenkins/casc/jenkins.yaml). Changes made in the UI are lost on the next reload/restart."
+  numExecutors: 2
+  scmCheckoutRetryCount: 2
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID:-admin}"
+          password: "${jenkins_admin_password}"
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "${JENKINS_URL:-http://localhost:8080/}"
+
+# Maven is installed in the image at /opt/maven (see Dockerfile).
+# Registering it here makes `tools { maven 'Maven' }` work (used by Jenkinsfile-SharedLibrary).
+# The plain Jenkinsfile calls `mvn` directly, which works because /opt/maven/bin is on PATH.
+tool:
+  maven:
+    installations:
+      - name: "Maven"
+        home: "/opt/maven"
+      # Used by the Jenkinsfile on GitHub (tools { maven 'maven-3.10' }).
+      # Same as the old Jenkins: auto-installed on first use.
+      - name: "maven-3.10"
+        properties:
+          - installSource:
+              installers:
+                - maven:
+                    id: "3.10.0"
+
+# IDs below match what the pipelines reference.
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          # Jenkinsfile + Jenkinsfile-SharedLibrary: sshagent(credentials: ['ec2-server-key'])
+          - basicSSHUserPrivateKey:
+              scope: GLOBAL
+              id: "ec2-server-key"
+              username: "ec2-user"
+              description: "SSH key for the EC2 deploy target"
+              privateKeySource:
+                directEntry:
+                  privateKey: "${ec2_server_key}"
+          # Used by the shared library's dockerLogin()/dockerPush() (Jenkinsfile-SharedLibrary).
+          # The ID 'docker-hub-repo' is what the course shared library expects - rename if yours differs.
+          - usernamePassword:
+              scope: GLOBAL
+              id: "docker-hub-repo"
+              description: "Docker Hub"
+              username: "${DOCKER_HUB_USER:-}"
+              password: "${docker_hub_password}"
+          # Jenkinsfile-SharedLibrary: modernSCM(... credentialsID: 'gitlab-credentials')
+          - usernamePassword:
+              scope: GLOBAL
+              id: "gitlab-credentials"
+              description: "GitLab (shared library checkout)"
+              username: "${GITLAB_USER:-}"
+              password: "${gitlab_password}"
+
+# Pipeline jobs (needs the job-dsl plugin). They read the pipeline definition from the repo.
+jobs:
+  - script: |
+      pipelineJob('java-maven-app') {
+        description('Test, build and deploy to EC2 (Jenkinsfile)')
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('${REPO_URL}') }
+                branch('*/${REPO_BRANCH:-master}')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
+
+      pipelineJob('java-maven-app-shared-library') {
+        description('Same app using the Jenkins shared library (Jenkinsfile-SharedLibrary)')
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('${REPO_URL}') }
+                branch('*/${REPO_BRANCH:-master}')
+              }
+            }
+            scriptPath('Jenkinsfile-SharedLibrary')
+            lightweight(true)
+          }
+        }
+      }
