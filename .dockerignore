@@ -3,6 +3,7 @@
 .gitattributes
 .dockerignore
 Dockerfile
+docker-compose.yaml
 Jenkinsfile
 jenkins/
 **/__pycache__/

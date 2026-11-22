@@ -1,0 +1,34 @@
+# Django app with Docker Compose.
+#
+# Local:  docker compose up -d --build            -> builds the image from this repo
+# EC2:    IMAGE_NAME=vioreldv2/learn-devops:django-v1.<N> docker-compose up -d
+#                                                  -> pulls the image Jenkins pushed
+#
+# Next step (not wired up yet): add a database service below and let Jenkins
+# deploy this file to EC2 instead of the plain `docker run` in the Jenkinsfile.
+services:
+  django-app:
+    image: ${IMAGE_NAME:-django-app:local}
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_ALLOWED_HOSTS: "*"
+    restart: unless-stopped
+    # depends_on:
+    #   - db
+
+  # db:
+  #   image: postgres:17
+  #   environment:
+  #     POSTGRES_DB: app
+  #     POSTGRES_USER: app
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #   volumes:
+  #     - db-data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+# volumes:
+#   db-data:
