@@ -2,30 +2,26 @@
 
 pipeline {
     agent any
-    tools {
-        maven 'maven-3.10'
-    }
     parameters {
         string(name: 'EC2_IP', defaultValue: '13.60.47.84', description: 'EC2 instance IP address')
     }
     environment {
-        // New tag per build, so EC2 always pulls the image that was just built
-        IMAGE_NAME = "vioreldv2/learn-devops:v2.${BUILD_NUMBER}"
+        // Same Docker Hub repo as the Java app (free plan allows 1 private repo), separate tag prefix
+        APP_VERSION = "django-v1.${BUILD_NUMBER}"
+        IMAGE_NAME  = "vioreldv2/learn-devops:django-v1.${BUILD_NUMBER}"
+        TEST_IMAGE  = "django-app-test:${BUILD_NUMBER}"
     }
     stages {
         stage("test") {
             steps {
                 script {
-                    echo "Testing the application..."
-                    sh 'mvn test'
+                    echo "Running the Django tests inside a Docker build..."
+                    sh 'docker build --target test -t "$TEST_IMAGE" .'
                 }
             }
-        }
-        stage("build jar") {
-            steps {
-                script {
-                    echo "Building the application..."
-                    sh 'mvn package -DskipTests'
+            post {
+                always {
+                    sh 'docker rmi "$TEST_IMAGE" || true'
                 }
             }
         }
@@ -33,7 +29,7 @@ pipeline {
             steps {
                 script {
                     echo "Building the Docker image ${IMAGE_NAME}..."
-                    sh 'docker build -t "$IMAGE_NAME" .'
+                    sh 'docker build --build-arg APP_VERSION="$APP_VERSION" -t "$IMAGE_NAME" .'
                     withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
                         sh 'docker push "$IMAGE_NAME"'
@@ -48,8 +44,8 @@ pipeline {
             steps {
                 script {
                     echo "Deploying ${IMAGE_NAME} to EC2..."
-                    // Replace the previous container so port 8080 is free
-                    def dockerCmd = "docker rm -f java-maven-app 2>/dev/null; docker run -d --name java-maven-app --restart unless-stopped -p 8080:8080 ${IMAGE_NAME}"
+                    // Own container name and port, so it runs next to the Java app (java-maven-app on 8080)
+                    def dockerCmd = "docker rm -f django-app 2>/dev/null; docker run -d --name django-app --restart unless-stopped -p 8000:8000 ${IMAGE_NAME}"
                     sshagent(credentials: ['ec2-server-key']) {
                         sh "ssh -o StrictHostKeyChecking=no ec2-user@${params.EC2_IP} '${dockerCmd}'"
                     }

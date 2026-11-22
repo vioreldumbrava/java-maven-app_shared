@@ -1,3 +1,16 @@
-# Only the built jar goes into the image build context
-*
-!target/*.jar
+.git
+.gitignore
+.gitattributes
+.dockerignore
+Dockerfile
+Jenkinsfile
+jenkins/
+**/__pycache__/
+**/*.pyc
+.venv/
+venv/
+staticfiles/
+target/
+.env
+.idea/
+.vscode/

@@ -1,0 +1,83 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Django App · learn-devops</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230c4b33'/%3E%3Ctext x='16' y='21' font-size='14' font-weight='700' font-family='monospace' text-anchor='middle' fill='white'%3Edj%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{% static 'core/style.css' %}">
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="{% url 'index' %}"><span class="brand-mark">dj</span>learn-devops</a>
+      <a class="nav-link" href="{% url 'health' %}">/health</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <span class="status"><span class="dot" aria-hidden="true"></span>Status {{ info.status }}</span>
+      <h1>Welcome to the <span class="accent">Django</span> application</h1>
+      <p class="lead">Tested, packaged and shipped by Jenkins. Running in a Docker container on AWS EC2.</p>
+      <div class="actions">
+        <a class="btn primary" href="{% url 'health' %}">View health JSON</a>
+        <a class="btn" href="#pipeline">How it gets here</a>
+      </div>
+    </section>
+
+    <section class="cards" aria-label="Runtime details">
+      <article class="card">
+        <h2>Version</h2>
+        <p class="value mono">{{ info.version }}</p>
+      </article>
+      <article class="card">
+        <h2>Container</h2>
+        <p class="value mono">{{ info.hostname }}</p>
+      </article>
+      <article class="card">
+        <h2>Uptime</h2>
+        <p class="value">{{ started_at|timesince }}</p>
+      </article>
+      <article class="card">
+        <h2>Python</h2>
+        <p class="value mono">{{ info.python }}</p>
+      </article>
+      <article class="card">
+        <h2>Django</h2>
+        <p class="value mono">{{ info.django }}</p>
+      </article>
+    </section>
+
+    <section id="pipeline" class="pipeline">
+      <h2 class="section-title">From commit to EC2</h2>
+      <ol class="steps">
+        <li class="step">
+          <span class="step-num">1</span>
+          <h3>Test</h3>
+          <p>Jenkins runs the Django test suite inside a Docker build.</p>
+        </li>
+        <li class="step">
+          <span class="step-num">2</span>
+          <h3>Build image</h3>
+          <p>The app is packaged with gunicorn and WhiteNoise into a slim Python image.</p>
+        </li>
+        <li class="step">
+          <span class="step-num">3</span>
+          <h3>Push</h3>
+          <p>The image is pushed to Docker Hub with a unique tag per build.</p>
+        </li>
+        <li class="step">
+          <span class="step-num">4</span>
+          <h3>Deploy</h3>
+          <p>EC2 pulls the image and replaces the running container on port 8000.</p>
+        </li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="container footer">
+    Served by gunicorn · {% now "Y-m-d H:i" %} UTC
+  </footer>
+</body>
+</html>
