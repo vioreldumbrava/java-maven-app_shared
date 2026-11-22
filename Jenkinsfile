@@ -45,9 +45,10 @@ pipeline {
                 script {
                     echo "Deploying ${IMAGE_NAME} to EC2..."
                     // Own container name and port, so it runs next to the Java app (java-maven-app on 8080)
-                    def dockerCmd = "docker rm -f django-app 2>/dev/null; docker run -d --name django-app --restart unless-stopped -p 8000:8000 ${IMAGE_NAME}"
+                    def dockerComposeCmd = "docker-compose -f docker-compose.yaml up --detach"
                     sshagent(credentials: ['ec2-server-key']) {
-                        sh "ssh -o StrictHostKeyChecking=no ec2-user@${params.EC2_IP} '${dockerCmd}'"
+                        sh "scp docker-compose.yaml ec2-user@${params.EC2_IP}:~/docker-compose.yaml"
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@${params.EC2_IP} '${dockerComposeCmd}'"
                     }
                 }
             }
