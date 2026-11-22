@@ -1,11 +1,14 @@
-# Django app with Docker Compose.
+# Django app + PostgreSQL with Docker Compose.
+#
+# First copy .env.example to .env and set POSTGRES_PASSWORD (.env is not committed).
 #
 # Local:  docker compose up -d --build            -> builds the image from this repo
 # EC2:    IMAGE_NAME=vioreldv2/learn-devops:django-v1.<N> docker-compose up -d
 #                                                  -> pulls the image Jenkins pushed
+# Stop:   docker compose down        (add -v to also delete the database volume)
 #
-# Next step (not wired up yet): add a database service below and let Jenkins
-# deploy this file to EC2 instead of the plain `docker run` in the Jenkinsfile.
+# Next step (not wired up yet): let Jenkins deploy this file to EC2 instead of
+# the plain `docker run` in the Jenkinsfile.
 services:
   django-app:
     image: ${IMAGE_NAME:-django-app:local}
@@ -16,19 +19,34 @@ services:
       - "8000:8000"
     environment:
       DJANGO_ALLOWED_HOSTS: "*"
+      # "db" is the service name below; Compose's network resolves it to that container
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    depends_on:
+      db:
+        # Wait until the healthcheck passes, not just until the container starts
+        condition: service_healthy
     restart: unless-stopped
-    # depends_on:
-    #   - db
 
-  # db:
-  #   image: postgres:17
-  #   environment:
-  #     POSTGRES_DB: app
-  #     POSTGRES_USER: app
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #   volumes:
-  #     - db-data:/var/lib/postgresql/data
-  #   restart: unless-stopped
+  db:
+    # postgres:17 keeps its data in /var/lib/postgresql/data (18 moved it)
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      # Named volume: the data survives `docker compose down` and container re-creation
+      - db-data:/var/lib/postgresql/data
+    # No "ports:" on purpose: only the app can reach the database, not the internet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
 
-# volumes:
-#   db-data:
+volumes:
+  db-data:

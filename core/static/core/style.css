@@ -9,6 +9,10 @@
   --on-accent: #ffffff;
   --accent-soft: #e4f3ec;
   --live: #2fa572;
+  --warn: #9a5b00;
+  --warn-soft: #fdf1dc;
+  --err: #b42318;
+  --err-soft: #fdecea;
   --shadow: 0 1px 2px rgb(15 26 22 / 0.04), 0 8px 24px rgb(15 26 22 / 0.06);
   --radius: 14px;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -25,6 +29,10 @@
     --on-accent: #06251a;
     --accent-soft: #13302a;
     --live: #44b78b;
+    --warn: #f0b552;
+    --warn-soft: #2e2412;
+    --err: #f3877d;
+    --err-soft: #331a18;
     --shadow: none;
   }
 }
@@ -123,6 +131,53 @@ h1 {
 .value { margin: 0; font-size: 1.15rem; font-weight: 600; overflow-wrap: anywhere; }
 .mono { font-family: var(--mono); }
 
+/* Hero status when the database is down */
+.status.warn { background: var(--warn-soft); color: var(--warn); }
+.status.warn .dot { background: var(--warn); animation: none; }
+
+/* Database panel */
+.db-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 0 0 64px;
+  box-shadow: var(--shadow);
+}
+.db-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.db-head .section-title { margin: 0; }
+.db-sub { margin: 4px 0 0; color: var(--muted); font-size: 0.95rem; }
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.badge-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.badge.ok { background: var(--accent-soft); color: var(--accent); }
+.badge.err { background: var(--err-soft); color: var(--err); }
+.badge.off { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.db-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 24px;
+  margin: 20px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.db-grid dt {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted);
+}
+.db-grid dd { margin: 4px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.db-note { margin: 16px 0 0; color: var(--muted); }
+.db-note code { font-family: var(--mono); font-size: 0.9em; color: var(--text); }
+.db-error {
+  margin: 16px 0 0; padding: 12px 14px; border-radius: 10px;
+  background: var(--err-soft); color: var(--err);
+  font-size: 14px; overflow-wrap: anywhere;
+}
+
 /* Pipeline */
 .section-title { font-size: 1.5rem; letter-spacing: -0.01em; margin: 0 0 20px; }
 .steps {
@@ -153,6 +208,10 @@ h1 {
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .db-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {

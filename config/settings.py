@@ -6,7 +6,7 @@ from django.core.management.utils import get_random_secret_key
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# The app has no sessions, logins or database, so a random key per start is fine.
+# The app has no sessions or logins, so a random key per start is fine.
 # Set DJANGO_SECRET_KEY if you add features that need a stable key.
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or get_random_secret_key()
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
@@ -37,8 +37,24 @@ TEMPLATES = [
     },
 ]
 
-# No database needed
-DATABASES = {}
+# PostgreSQL when POSTGRES_HOST is set (docker-compose sets it to "db").
+# Without it (tests, plain `docker run`) there is no database and the page
+# shows "not configured" instead of failing.
+if os.environ.get("POSTGRES_HOST"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "HOST": os.environ["POSTGRES_HOST"],
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+            "NAME": os.environ.get("POSTGRES_DB", "app"),
+            "USER": os.environ.get("POSTGRES_USER", "app"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", ""),
+            # Give up after 3 s, so a down database doesn't hang the page
+            "OPTIONS": {"connect_timeout": 3},
+        }
+    }
+else:
+    DATABASES = {}
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"

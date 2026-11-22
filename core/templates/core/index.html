@@ -17,7 +17,7 @@
 
   <main class="container">
     <section class="hero">
-      <span class="status"><span class="dot" aria-hidden="true"></span>Status {{ info.status }}</span>
+      <span class="status{% if info.status != 'OK' %} warn{% endif %}"><span class="dot" aria-hidden="true"></span>Status {{ info.status }}</span>
       <h1>Welcome to the <span class="accent">Django</span> application</h1>
       <p class="lead">Tested, packaged and shipped by Jenkins. Running in a Docker container on AWS EC2.</p>
       <div class="actions">
@@ -47,6 +47,41 @@
         <h2>Django</h2>
         <p class="value mono">{{ info.django }}</p>
       </article>
+    </section>
+
+    <section class="db-panel" aria-labelledby="db-title">
+      <div class="db-head">
+        <div>
+          <h2 id="db-title" class="section-title">Database</h2>
+          <p class="db-sub">PostgreSQL, running as its own container next to the app</p>
+        </div>
+        {% if db.status == "connected" %}
+          <span class="badge ok"><span class="badge-dot" aria-hidden="true"></span>Connected</span>
+        {% elif db.status == "error" %}
+          <span class="badge err"><span class="badge-dot" aria-hidden="true"></span>Unreachable</span>
+        {% else %}
+          <span class="badge off"><span class="badge-dot" aria-hidden="true"></span>Not configured</span>
+        {% endif %}
+      </div>
+
+      {% if db.status == "not configured" %}
+        <p class="db-note">This container was started without a database. Run it with
+          <code>docker compose up</code> to start PostgreSQL next to it, or set <code>POSTGRES_HOST</code>.</p>
+      {% else %}
+        <dl class="db-grid">
+          <div><dt>Host</dt><dd class="mono">{{ db.host }}:{{ db.port }}</dd></div>
+          <div><dt>Database</dt><dd class="mono">{{ db.name }}</dd></div>
+          <div><dt>User</dt><dd class="mono">{{ db.user }}</dd></div>
+          {% if db.status == "connected" %}
+            <div><dt>Server version</dt><dd class="mono">{{ db.server_version }}</dd></div>
+            <div><dt>Query latency</dt><dd class="mono">{{ db.latency_ms }} ms</dd></div>
+            <div><dt>DB uptime</dt><dd>{{ db_started_at|timesince }}</dd></div>
+          {% endif %}
+        </dl>
+        {% if db.status == "error" %}
+          <p class="db-error mono">{{ db.error }}</p>
+        {% endif %}
+      {% endif %}
     </section>
 
     <section id="pipeline" class="pipeline">

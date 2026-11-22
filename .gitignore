@@ -1,6 +1,7 @@
 .idea/*
 target
 jenkins/.env
+.env
 jenkins/secrets/
 
 # Python / Django
