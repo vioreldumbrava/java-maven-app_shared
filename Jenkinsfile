@@ -28,7 +28,7 @@ pipeline {
         stage("deploy") {
             steps {
                 script {
-                    def dockerCmd = 'docker run -p 3080:3080 -d vioreldv2/learn-devops:v1'
+                    def dockerCmd = 'docker run -p 8080:8080 -d vioreldv2/learn-devops:v2'
                     sshagent(credentials: ['ec2-server-key']) {
                         sh "ssh -o StrictHostKeyChecking=no ec2-user@${params.EC2_IP} ${dockerCmd}"
                     }
