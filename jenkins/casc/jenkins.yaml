@@ -72,6 +72,12 @@ credentials:
               description: "GitLab (shared library checkout)"
               username: "${GITLAB_USER:-}"
               password: "${gitlab_password}"
+          # Django Jenkinsfile (branch django-app): written to .env on EC2 for docker-compose
+          - string:
+              scope: GLOBAL
+              id: "postgres-password"
+              description: "PostgreSQL password for the Django app on EC2"
+              secret: "${postgres_password}"
 
 # Pipeline jobs (needs the job-dsl plugin). They read the pipeline definition from the repo.
 jobs:
@@ -103,6 +109,22 @@ jobs:
               }
             }
             scriptPath('Jenkinsfile-SharedLibrary')
+            lightweight(true)
+          }
+        }
+      }
+
+      pipelineJob('django-app') {
+        description('Django app + PostgreSQL: test, build, push and deploy to EC2 with docker-compose')
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote { url('${DJANGO_REPO_URL:-https://github.com/vioreldumbrava/java-maven-app_shared.git}') }
+                branch('*/${DJANGO_BRANCH:-django-app}')
+              }
+            }
+            scriptPath('Jenkinsfile')
             lightweight(true)
           }
         }

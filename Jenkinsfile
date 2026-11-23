@@ -52,22 +52,9 @@ pipeline {
                     // 'postgres-password' is a "Secret text" credential in Jenkins
                     withCredentials([string(credentialsId: 'postgres-password', variable: 'POSTGRES_PASSWORD')]) {
                         sshagent(credentials: ['ec2-server-key']) {
-                            // Single quotes: the shell (not Groovy) expands the variables,
-                            // so the password never ends up in the Groovy string or the log
-                            sh '''
-                                SSH_OPTS="-o StrictHostKeyChecking=no"
-                                ssh $SSH_OPTS "$SSH_TARGET" "mkdir -p ~/$DEPLOY_DIR"
-                                scp $SSH_OPTS docker-compose.yaml "$SSH_TARGET:~/$DEPLOY_DIR/docker-compose.yaml"
-
-                                # Write .env on EC2 through stdin, readable only by ec2-user.
-                                # docker-compose reads it automatically from the same folder.
-                                printf 'IMAGE_NAME=%s\\nPOSTGRES_PASSWORD=%s\\n' "$IMAGE_NAME" "$POSTGRES_PASSWORD" \
-                                    | ssh $SSH_OPTS "$SSH_TARGET" "umask 077 && cat > ~/$DEPLOY_DIR/.env"
-
-                                # Pull the new image, then (re)create only what changed.
-                                # --wait: fail the build if a container doesn't become healthy/running
-                                ssh $SSH_OPTS "$SSH_TARGET" "cd ~/$DEPLOY_DIR && docker-compose pull django-app && docker-compose up -d --wait"
-                            '''
+                            // deploy.sh reads POSTGRES_PASSWORD and DEPLOY_DIR from the environment.
+                            // Single quotes: the shell (not Groovy) expands the variables.
+                            sh 'bash deploy.sh "$SSH_TARGET" "$IMAGE_NAME"'
                         }
                     }
                 }

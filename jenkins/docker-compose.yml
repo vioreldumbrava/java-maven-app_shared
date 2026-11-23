@@ -14,6 +14,8 @@ services:
       GITLAB_USER: ${GITLAB_USER:-}
       REPO_URL: ${REPO_URL:?Set REPO_URL in jenkins/.env (git URL of this project)}
       REPO_BRANCH: ${REPO_BRANCH:-master}
+      DJANGO_REPO_URL: ${DJANGO_REPO_URL:-https://github.com/vioreldumbrava/java-maven-app_shared.git}
+      DJANGO_BRANCH: ${DJANGO_BRANCH:-django-app}
     volumes:
       - jenkins_home:/var/jenkins_home
       # JCasC YAML is mounted, not baked in: edit it, then Manage Jenkins > Configuration as Code > Reload
@@ -27,6 +29,7 @@ services:
       - docker_hub_password
       - gitlab_password
       - ec2_server_key
+      - postgres_password
 
 secrets:
   jenkins_admin_password:
@@ -37,6 +40,8 @@ secrets:
     file: ./secrets/gitlab_password
   ec2_server_key:
     file: ./secrets/ec2_server_key
+  postgres_password:
+    file: ./secrets/postgres_password
 
 volumes:
   jenkins_home:

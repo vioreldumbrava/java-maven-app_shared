@@ -5,6 +5,9 @@
 Dockerfile
 docker-compose.yaml
 Jenkinsfile
+deploy.sh
+server-cmds.sh
+.env.example
 jenkins/
 **/__pycache__/
 **/*.pyc
