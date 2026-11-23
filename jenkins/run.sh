@@ -31,6 +31,7 @@ docker run -d --name "$NAME" --restart unless-stopped \
   -e JENKINS_ADMIN_ID="${JENKINS_ADMIN_ID:-admin}" \
   -e DOCKER_HUB_USER="${DOCKER_HUB_USER:-}" \
   -e GITLAB_USER="${GITLAB_USER:-}" \
+  -e AWS_ECR_ACCESS_KEY_ID="${AWS_ECR_ACCESS_KEY_ID:-}" \
   -e REPO_URL="$REPO_URL" \
   -e REPO_BRANCH="${REPO_BRANCH:-master}" \
   -e DJANGO_REPO_URL="${DJANGO_REPO_URL:-https://github.com/vioreldumbrava/java-maven-app_shared.git}" \

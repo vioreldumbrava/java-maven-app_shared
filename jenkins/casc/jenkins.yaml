@@ -78,6 +78,13 @@ credentials:
               id: "postgres-password"
               description: "PostgreSQL password for the Django app on EC2"
               secret: "${postgres_password}"
+          # Django Jenkinsfile (branch django-ecr): push to Amazon ECR and log EC2 in to it
+          - usernamePassword:
+              scope: GLOBAL
+              id: "aws-ecr-credentials"
+              description: "AWS access key for Amazon ECR"
+              username: "${AWS_ECR_ACCESS_KEY_ID:-}"
+              password: "${aws_secret_access_key}"
 
 # Pipeline jobs (needs the job-dsl plugin). They read the pipeline definition from the repo.
 jobs:

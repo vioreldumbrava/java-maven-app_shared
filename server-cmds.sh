@@ -10,7 +10,9 @@
 #   from Jenkins (password on stdin, so it is never in a command line):
 #     printf '%s\n' "$POSTGRES_PASSWORD" | ssh ec2-user@<ip> "bash ~/django-app/server-cmds.sh <image>"
 #   by hand on EC2, e.g. to go back to an older version (password is taken from .env):
-#     cd ~/django-app && bash server-cmds.sh vioreldv2/learn-devops:django-v1.3
+#     cd ~/django-app && bash server-cmds.sh 177203142220.dkr.ecr.eu-north-1.amazonaws.com/my-app:django-v1.3
+#   (an image that is no longer on the server needs a valid ECR login: the token
+#    deploy.sh sends is valid for 12 hours)
 set -euo pipefail
 cd "$(dirname "$0")"   # the folder with docker-compose.yaml and .env
 

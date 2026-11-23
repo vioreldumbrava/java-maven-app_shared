@@ -12,6 +12,7 @@ services:
       JENKINS_ADMIN_ID: ${JENKINS_ADMIN_ID:-admin}
       DOCKER_HUB_USER: ${DOCKER_HUB_USER:-}
       GITLAB_USER: ${GITLAB_USER:-}
+      AWS_ECR_ACCESS_KEY_ID: ${AWS_ECR_ACCESS_KEY_ID:-}
       REPO_URL: ${REPO_URL:?Set REPO_URL in jenkins/.env (git URL of this project)}
       REPO_BRANCH: ${REPO_BRANCH:-master}
       DJANGO_REPO_URL: ${DJANGO_REPO_URL:-https://github.com/vioreldumbrava/java-maven-app_shared.git}
@@ -30,6 +31,7 @@ services:
       - gitlab_password
       - ec2_server_key
       - postgres_password
+      - aws_secret_access_key
 
 secrets:
   jenkins_admin_password:
@@ -42,6 +44,8 @@ secrets:
     file: ./secrets/ec2_server_key
   postgres_password:
     file: ./secrets/postgres_password
+  aws_secret_access_key:
+    file: ./secrets/aws_secret_access_key
 
 volumes:
   jenkins_home:

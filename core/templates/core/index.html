@@ -100,12 +100,12 @@
         <li class="step">
           <span class="step-num">3</span>
           <h3>Push</h3>
-          <p>The image is pushed to Docker Hub with a unique tag per build.</p>
+          <p>The image is pushed to Amazon ECR with a unique tag per build.</p>
         </li>
         <li class="step">
           <span class="step-num">4</span>
           <h3>Deploy</h3>
-          <p>EC2 pulls the image and replaces the running container on port 8000.</p>
+          <p>EC2 pulls the image, starts it next to PostgreSQL and rolls back if the health check fails.</p>
         </li>
       </ol>
     </section>

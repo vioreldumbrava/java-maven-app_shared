@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Set DJANGO_SECRET_KEY if you add features that need a stable key.
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or get_random_secret_key()
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() == "true"
-# "*" because the app is reached by IP. Set e.g. DJANGO_ALLOWED_HOSTS=13.60.47.84 to restrict.
+# "*" because the app is reached by IP. Set e.g. DJANGO_ALLOWED_HOSTS=16.171.230.252 to restrict.
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
 INSTALLED_APPS = [

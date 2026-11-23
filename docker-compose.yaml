@@ -3,12 +3,10 @@
 # First copy .env.example to .env and set POSTGRES_PASSWORD (.env is not committed).
 #
 # Local:  docker compose up -d --build            -> builds the image from this repo
-# EC2:    IMAGE_NAME=vioreldv2/learn-devops:django-v1.<N> docker-compose up -d
-#                                                  -> pulls the image Jenkins pushed
+# EC2:    deploy.sh / server-cmds.sh write IMAGE_NAME to .env, e.g.
+#         IMAGE_NAME=177203142220.dkr.ecr.eu-north-1.amazonaws.com/my-app:django-v1.<N>
+#                                                  -> pulls the image Jenkins pushed to ECR
 # Stop:   docker compose down        (add -v to also delete the database volume)
-#
-# Next step (not wired up yet): let Jenkins deploy this file to EC2 instead of
-# the plain `docker run` in the Jenkinsfile.
 services:
   django-app:
     image: ${IMAGE_NAME:-django-app:local}
