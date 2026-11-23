@@ -36,6 +36,7 @@ docker run -d --name "$NAME" --restart unless-stopped \
   -e REPO_BRANCH="${REPO_BRANCH:-master}" \
   -e DJANGO_REPO_URL="${DJANGO_REPO_URL:-https://github.com/vioreldumbrava/java-maven-app_shared.git}" \
   -e DJANGO_BRANCH="${DJANGO_BRANCH:-django-app}" \
+  -e DJANGO_ECR_BRANCH="${DJANGO_ECR_BRANCH:-django-ecr}" \
   -v "$VOLUME:/var/jenkins_home" \
   -v "$PWD/casc:/var/jenkins_casc:ro" \
   -v "$PWD/secrets:/run/secrets:ro" \

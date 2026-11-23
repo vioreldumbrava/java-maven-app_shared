@@ -17,6 +17,7 @@ services:
       REPO_BRANCH: ${REPO_BRANCH:-master}
       DJANGO_REPO_URL: ${DJANGO_REPO_URL:-https://github.com/vioreldumbrava/java-maven-app_shared.git}
       DJANGO_BRANCH: ${DJANGO_BRANCH:-django-app}
+      DJANGO_ECR_BRANCH: ${DJANGO_ECR_BRANCH:-django-ecr}
     volumes:
       - jenkins_home:/var/jenkins_home
       # JCasC YAML is mounted, not baked in: edit it, then Manage Jenkins > Configuration as Code > Reload
